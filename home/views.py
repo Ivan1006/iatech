@@ -1,5 +1,5 @@
 from django.conf import settings
-from django.core.mail import send_mail
+from django.core.mail import EmailMessage
 from django.shortcuts import render
 
 
@@ -17,13 +17,13 @@ def index(request):
         )
 
         try:
-            send_mail(
-                subject,
-                body,
-                settings.DEFAULT_FROM_EMAIL,
-                [settings.CONTACT_EMAIL],
+            EmailMessage(
+                subject=subject,
+                body=body,
+                from_email=settings.DEFAULT_FROM_EMAIL,
+                to=[settings.CONTACT_EMAIL],
                 reply_to=[email] if email else None,
-            )
+            ).send()
             return render(request, "home/index.html", {"success": True})
         except Exception:
             return render(
