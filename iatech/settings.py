@@ -136,13 +136,17 @@ USE_TZ = True
 STATIC_URL = "static/"
 STATIC_ROOT = BASE_DIR / "staticfiles"
 
-# WhiteNoise: comprime y cachea los estáticos para servirlos sin Nginx.
+# WhiteNoise sirve los estáticos sin necesitar Nginx.
+# USE_FINDERS=True hace que los sirva directamente desde las apps, así que
+# la página funciona aunque `collectstatic` no se haya ejecutado en el deploy.
+WHITENOISE_USE_FINDERS = True
 STORAGES = {
     "default": {
         "BACKEND": "django.core.files.storage.FileSystemStorage",
     },
     "staticfiles": {
-        "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
+        # Sin "manifest": evita el error 500 si falta el manifiesto de estáticos.
+        "BACKEND": "whitenoise.storage.CompressedStaticFilesStorage",
     },
 }
 
