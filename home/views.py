@@ -1,4 +1,6 @@
 import json
+import sys
+import urllib.error
 import urllib.request
 
 from django.conf import settings
@@ -26,9 +28,18 @@ def _send_via_resend(subject, body, reply_to):
         method="POST",
     )
     # timeout corto: si algo falla, no cuelga el worker (lo que causaba el 500).
-    with urllib.request.urlopen(req, timeout=10) as resp:
-        if resp.status >= 300:
-            raise RuntimeError(f"Resend respondió {resp.status}")
+    try:
+        with urllib.request.urlopen(req, timeout=10) as resp:
+            if resp.status >= 300:
+                raise RuntimeError(f"Resend respondió {resp.status}")
+    except urllib.error.HTTPError as exc:
+        # Muestra el motivo exacto de Resend en los logs de Railway.
+        detail = exc.read().decode("utf-8", "replace")
+        print(f"[RESEND ERROR] HTTP {exc.code}: {detail}", file=sys.stderr, flush=True)
+        raise
+    except Exception as exc:
+        print(f"[RESEND ERROR] {type(exc).__name__}: {exc}", file=sys.stderr, flush=True)
+        raise
 
 
 def index(request):
