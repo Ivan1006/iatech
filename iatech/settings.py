@@ -154,20 +154,19 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 
 # --- Email (contact form) ------------------------------------------------
+# El formulario envía vía la API HTTP de Resend (https://resend.com), no por
+# SMTP: los hosts como Railway BLOQUEAN el puerto SMTP saliente, así que un
+# envío SMTP se queda colgado y tumba el worker. HTTP (puerto 443) sí funciona.
 
-EMAIL_BACKEND = os.environ.get(
-    "EMAIL_BACKEND", "django.core.mail.backends.console.EmailBackend"
-)
-EMAIL_HOST = os.environ.get("EMAIL_HOST", "smtp.gmail.com")
-EMAIL_PORT = int(os.environ.get("EMAIL_PORT", "587"))
-EMAIL_USE_TLS = env_bool("EMAIL_USE_TLS", True)
-EMAIL_HOST_USER = os.environ.get("EMAIL_HOST_USER", "")
-EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_HOST_PASSWORD", "")
+RESEND_API_KEY = os.environ.get("RESEND_API_KEY", "")
+# Remitente. "onboarding@resend.dev" funciona sin verificar dominio (solo puede
+# enviar a tu propio correo de la cuenta Resend). Para enviar a cualquier
+# dirección, verifica iatechcorp.com en Resend y usa algo como
+# "IA Tech <contacto@iatechcorp.com>".
+RESEND_FROM = os.environ.get("RESEND_FROM", "IA Tech <onboarding@resend.dev>")
 
-DEFAULT_FROM_EMAIL = os.environ.get(
-    "DEFAULT_FROM_EMAIL", EMAIL_HOST_USER or "no-reply@iatech.com"
-)
-CONTACT_EMAIL = os.environ.get("CONTACT_EMAIL", DEFAULT_FROM_EMAIL)
+# A dónde llegan los mensajes del formulario.
+CONTACT_EMAIL = os.environ.get("CONTACT_EMAIL", "iatechcol1006@gmail.com")
 
 
 # --- Security hardening when DEBUG is off --------------------------------
